@@ -16,6 +16,28 @@
         <div id="mapContainer">
 
         </div>
+
+        <!-- 在页面底部悬浮的工具栏 -->
+        <div class="floating-toolbar">
+            <button id="btn1">添加立方体</button>
+            <button id="btn2">添加球体</button>
+            <button id="btn3">添加平面</button>
+            <button id="btn4">添加线</button>
+            <button id="btn5">添加点</button>
+            <button id="btn6">添加模型</button>
+            <button id="btn7">添加地形</button>
+            <button id="btn8">添加地形</button>
+          </div>
+        <!-- <div id="toolbar" style="display: block;position: absolute;float: left;">
+            <button id="btn1">添加立方体</button>
+            <button id="btn2">添加球体</button>
+            <button id="btn3">添加平面</button>
+            <button id="btn4">添加线</button>
+            <button id="btn5">添加点</button>
+            <button id="btn6">添加模型</button>
+            <button id="btn7">添加地形</button>
+            <button id="btn8">添加地形</button>
+        </div> -->
 		<script type="importmap">
 			{
 				"imports": {
@@ -31,8 +53,8 @@
 
 			import * as THREE from 'three';
             import {WegeoMap,MapView, TianDiTuProvider, Config, BingMapsProvider, AngleUtils, Mercator,  UnitsUtils,DefaultPlaneProvider, GraphicTilingScheme} from 'Geo';
-            import { TransformControls } from 'three/addons/controls/TransformControls.js';
-            // import {MeshControls} from 'Editor3js';
+            // import { TransformControls } from 'three/addons/controls/TransformControls.js';
+            import {MeshControls} from 'Editor3js';
             // let provider = new BingMapsProvider();
             // 地名服务
             let provider = new TianDiTuProvider({
@@ -60,7 +82,7 @@
             // map.moveTo(45.993553258799736,90.14134050768502,10000);
             // map.moveTo(31.24169-4.268,121.49491,10000);
             // map.moveTo(31.24169,121.49491,100000);
-            map.moveTo(39.90710,116.39143,10000);
+            map.moveTo(0,0,100000);
             // map.moveTo(39.908692,116.397477,100000);
             // let point = Mercator.project({lat:45.993553258799736, lng: 90.14134050768502});
             // console.log("project point:",point);
@@ -68,118 +90,24 @@
             map.animate();
             map.resize();
             let layer = map.baseMap;
-            function render(){
-                layer.renderer.render( layer.scene, layer.camera );
-            }
-            let control = new TransformControls( layer.camera, layer.renderer.domElement );
-            // control.addEventListener( 'change', render );
-            control.addEventListener( 'dragging-changed', function ( event ) {
+            let meshControls = new MeshControls(layer);
+            let group = meshControls.caterGroup;
 
-                layer.controls.enabled = ! event.value;
-
-            } );
-            const texture = new THREE.TextureLoader().load( 'https://threejs.org/examples/textures/crate.gif' );
+            const texture = new THREE.TextureLoader().load( './icons/boat.png' );
             let coord = UnitsUtils.datumsToSpherical(39.90710,116.39143);
-            texture.colorSpace = THREE.SRGBColorSpace;
-            texture.anisotropy = layer.renderer.capabilities.getMaxAnisotropy();
+            // texture.colorSpace = THREE.SRGBColorSpace;
+            // texture.anisotropy = layer.renderer.capabilities.getMaxAnisotropy();
             const geometry = new THREE.BoxGeometry();
             const material = new THREE.MeshLambertMaterial( { map: texture } );
             const mesh = new THREE.Mesh( geometry, material );
-            mesh.position.set(coord.x,1000, -coord.y);
-            mesh.scale.set(1000,1000,1000);
-            layer.scene.add( mesh );
+            mesh.position.set(100000,100, 0);
+            mesh.scale.set(100000,100000,100000);
+            group.add(mesh);
 
             
-            const gizmo = control.getHelper();
-            layer.scene.add( gizmo );
-            control.attach( mesh );
-            window.addEventListener( 'keydown', function ( event ) {
-
-switch ( event.key ) {
-
-    case 'q':
-        control.setSpace( control.space === 'local' ? 'world' : 'local' );
-        break;
-
-    case 'Shift':
-        control.setTranslationSnap( 1 );
-        control.setRotationSnap( THREE.MathUtils.degToRad( 15 ) );
-        control.setScaleSnap( 0.25 );
-        break;
-
-    case 'w':
-        control.setMode( 'translate' );
-        break;
-
-    case 'e':
-        control.setMode( 'rotate' );
-        break;
-
-    case 'r':
-        control.setMode( 'scale' );
-        break;
-
-    case 'c':
-        const position = currentCamera.position.clone();
-
-        currentCamera = currentCamera.isPerspectiveCamera ? cameraOrtho : cameraPersp;
-        currentCamera.position.copy( position );
-
-        orbit.object = currentCamera;
-        control.camera = currentCamera;
-
-        currentCamera.lookAt( orbit.target.x, orbit.target.y, orbit.target.z );
-        onWindowResize();
-        break;
-
-    case 'v':
-        const randomFoV = Math.random() + 0.1;
-        const randomZoom = Math.random() + 0.1;
-
-        cameraPersp.fov = randomFoV * 160;
-        cameraOrtho.bottom = - randomFoV * 500;
-        cameraOrtho.top = randomFoV * 500;
-
-        cameraPersp.zoom = randomZoom * 5;
-        cameraOrtho.zoom = randomZoom * 5;
-        onWindowResize();
-        break;
-
-    case '+':
-    case '=':
-        control.setSize( control.size + 0.1 );
-        break;
-
-    case '-':
-    case '_':
-        control.setSize( Math.max( control.size - 0.1, 0.1 ) );
-        break;
-
-    case 'x':
-        control.showX = ! control.showX;
-        break;
-
-    case 'y':
-        control.showY = ! control.showY;
-        break;
-
-    case 'z':
-        control.showZ = ! control.showZ;
-        break;
-
-    case ' ':
-        control.enabled = ! control.enabled;
-        break;
-
-    case 'Escape':
-        control.reset();
-        break;
-
-}
-
-} );
 
             // 后续再侧边栏启动工具栏
+            
 		</script>
 
 	</body>
