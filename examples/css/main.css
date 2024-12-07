@@ -1,0 +1,47 @@
+/* 页面整体布局样式，让主体内容有一定的内边距等 */
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+  }
+  
+  .main-content {
+    padding: 20px;
+  }
+  
+/* 悬浮工具栏的样式设置 */
+.floating-toolbar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    left: 50%; /* 先将左边距设置为50%，以页面左边缘为基准向右偏移50% */
+    transform: translateX(-50%); /* 再通过向左平移自身宽度的50%，使其水平居中 */
+    display: inline-flex; /* 使用内联弹性布局，让工具栏宽度自适应内容 */
+    border-radius: 25px;
+    box-sizing: border-box;
+    background-color: rgba(34, 99, 164, 0.5); /* 半透明背景，更显精致 */
+    box-shadow: 0 0 10px rgba(0, 188, 212, 0.5);
+    padding: 8px 10px;
+    display: flex;
+    justify-content: center; /* 让按钮组在水平方向居中 */
+    align-items: center; /* 垂直方向上居中按钮 */
+    z-index: 99;
+  }
+  
+  .floating-toolbar button {
+    display: inline-block;
+    height: 40px;
+    min-width: 80px;
+    padding: 0 15px;
+    border: none;
+    border-radius: 25px;
+    background: linear-gradient(45deg, #00b0ff, #00e5ff); /* 渐变背景色，体现科技感的动态效果 */
+    color: white;
+    cursor: pointer;
+    transition: background 0.3s ease;
+    box-shadow: 0 0 5px rgba(0, 188, 212, 0.4); /* 按钮的蓝色光影阴影 */
+  }
+  
+  .floating-toolbar button:hover {
+    background-color: #0056b3; /* 按钮鼠标悬停背景色 */
+  }

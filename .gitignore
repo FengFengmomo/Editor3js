@@ -1,0 +1,17 @@
+# Dependency directories
+.vscode/
+node_modules/
+# examples/
+examples/data/*.mp4
+examples/cesiumlab_trean_3dtiles/*
+examples/data/cesiumlab_trean_3dtiles/*
+libs/*/*
+docs/
+package-lock.json
+rollup.example.js
+pnpm-lock.yaml
+yarn.lock
+jspm_packages/
+deps/
+readme/
+build/jsm/*

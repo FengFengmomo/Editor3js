@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>three.js webgl - transform controls</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+		<link type="text/css" rel="stylesheet" href="./css/main.css">
+	</head>
+	<body>
+
+		<div id="info">
+			"W" translate | "E" rotate | "R" scale | "+/-" adjust size<br />
+			"X" toggle X | "Y" toggle Y | "Z" toggle Z | "Spacebar" toggle enabled<br />
+			"Esc" reset current transform<br />
+		</div>
+        <div id="mapContainer">
+
+        </div>
+
+        <!-- 在页面底部悬浮的工具栏 -->
+        <div class="floating-toolbar">
+            <button id="btn1">添加立方体</button>
+            <button id="btn2">添加球体</button>
+            <button id="btn3">添加平面</button>
+            <button id="btn4">添加线</button>
+            <button id="btn5">添加点</button>
+            <button id="btn6">添加模型</button>
+            <button id="btn7">添加地形</button>
+            <button id="btn8">添加地形</button>
+          </div>
+        <!-- <div id="toolbar" style="display: block;position: absolute;float: left;">
+            <button id="btn1">添加立方体</button>
+            <button id="btn2">添加球体</button>
+            <button id="btn3">添加平面</button>
+            <button id="btn4">添加线</button>
+            <button id="btn5">添加点</button>
+            <button id="btn6">添加模型</button>
+            <button id="btn7">添加地形</button>
+            <button id="btn8">添加地形</button>
+        </div> -->
+		<script type="importmap">
+			{
+				"imports": {
+					"three": "../build/three.module.js",
+                    "three/addons/": "../build/jsm/",
+                    "Geo": "../build/wegeo.module.js",
+                    "Editor3js": "../build/Editor3js.module.js"
+				}
+			}
+		</script>
+
+		<script type="module">
+
+			import * as THREE from 'three';
+            import {WegeoMap,MapView, TianDiTuProvider, Config, BingMapsProvider, AngleUtils, Mercator,  UnitsUtils,DefaultPlaneProvider, GraphicTilingScheme} from 'Geo';
+            // import { TransformControls } from 'three/addons/controls/TransformControls.js';
+            import {MeshControls} from 'Editor3js';
+            // let provider = new BingMapsProvider();
+            // 地名服务
+            let provider = new TianDiTuProvider({
+                service:'img_c',
+                token: '588e61bc464868465169f209fe694dd0'
+            });
+
+            // let edgeprovider = new TianDiTuProvider({
+            // 	service:'ibo_w',
+            // 	token: '588e61bc464868465169f209fe694dd0'
+            // });
+            // Config.outLine.on = true;
+            let heightProvider = new DefaultPlaneProvider({
+                tilingScheme: new GraphicTilingScheme()
+            });
+            const map = new WegeoMap(); 
+            map.addBaseMap({
+                providers: [provider],
+                heightProvider: heightProvider
+            });
+            let imageLayer = new THREE.Group();
+            map.baseMap.add(imageLayer);
+            
+            // map.moveTo(45.993553258799736-4.268,90.14134050768502,10000);
+            // map.moveTo(45.993553258799736,90.14134050768502,10000);
+            // map.moveTo(31.24169-4.268,121.49491,10000);
+            // map.moveTo(31.24169,121.49491,100000);
+            map.moveTo(0,0,100000);
+            // map.moveTo(39.908692,116.397477,100000);
+            // let point = Mercator.project({lat:45.993553258799736, lng: 90.14134050768502});
+            // console.log("project point:",point);
+            window.onresize = () => { map.resize(); }
+            map.animate();
+            map.resize();
+            let layer = map.baseMap;
+            let meshControls = new MeshControls(layer);
+            let group = meshControls.caterGroup;
+
+            const texture = new THREE.TextureLoader().load( './icons/boat.png' );
+            let coord = UnitsUtils.datumsToSpherical(39.90710,116.39143);
+            // texture.colorSpace = THREE.SRGBColorSpace;
+            // texture.anisotropy = layer.renderer.capabilities.getMaxAnisotropy();
+            const geometry = new THREE.BoxGeometry();
+            const material = new THREE.MeshLambertMaterial( { map: texture } );
+            const mesh = new THREE.Mesh( geometry, material );
+            mesh.position.set(100000,100, 0);
+            mesh.scale.set(100000,100000,100000);
+            group.add(mesh);
+            // 后续再侧边栏启动工具栏
+		</script>
+
+	</body>
+</html>

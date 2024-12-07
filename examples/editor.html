@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>three.js webgl - transform controls</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+		<link type="text/css" rel="stylesheet" href="./css/main.css">
+	</head>
+	<body>
+
+		<div id="info">
+			"W" translate | "E" rotate | "R" scale | "+/-" adjust size<br />
+			"X" toggle X | "Y" toggle Y | "Z" toggle Z | "Spacebar" toggle enabled<br />
+			"Esc" reset current transform<br />
+		</div>
+        <div id="mapContainer">
+
+        </div>
+		<script type="importmap">
+			{
+				"imports": {
+					"three": "../build/three.module.js",
+                    "three/addons/": "../build/jsm/",
+                    "Geo": "../build/wegeo.module.js",
+                    "Editor3js": "../build/Editor3js.module.js"
+				}
+			}
+		</script>
+
+		<script type="module">
+
+			import * as THREE from 'three';
+            import {WegeoMap,MapView, TianDiTuProvider, Config, BingMapsProvider, AngleUtils, Mercator,  UnitsUtils,DefaultPlaneProvider, GraphicTilingScheme} from 'Geo';
+            import { TransformControls } from 'three/addons/controls/TransformControls.js';
+            // import {MeshControls} from 'Editor3js';
+            // let provider = new BingMapsProvider();
+            // 地名服务
+            let provider = new TianDiTuProvider({
+                service:'img_c',
+                token: '588e61bc464868465169f209fe694dd0'
+            });
+
+            // let edgeprovider = new TianDiTuProvider({
+            // 	service:'ibo_w',
+            // 	token: '588e61bc464868465169f209fe694dd0'
+            // });
+            // Config.outLine.on = true;
+            let heightProvider = new DefaultPlaneProvider({
+                tilingScheme: new GraphicTilingScheme()
+            });
+            const map = new WegeoMap(); 
+            map.addBaseMap({
+                providers: [provider],
+                heightProvider: heightProvider
+            });
+            let imageLayer = new THREE.Group();
+            map.baseMap.add(imageLayer);
+            
+            // map.moveTo(45.993553258799736-4.268,90.14134050768502,10000);
+            // map.moveTo(45.993553258799736,90.14134050768502,10000);
+            // map.moveTo(31.24169-4.268,121.49491,10000);
+            // map.moveTo(31.24169,121.49491,100000);
+            map.moveTo(39.90710,116.39143,10000);
+            // map.moveTo(39.908692,116.397477,100000);
+            // let point = Mercator.project({lat:45.993553258799736, lng: 90.14134050768502});
+            // console.log("project point:",point);
+            window.onresize = () => { map.resize(); }
+            map.animate();
+            map.resize();
+            let layer = map.baseMap;
+            function render(){
+                layer.renderer.render( layer.scene, layer.camera );
+            }
+            let control = new TransformControls( layer.camera, layer.renderer.domElement );
+            // control.addEventListener( 'change', render );
+            control.addEventListener( 'dragging-changed', function ( event ) {
+
+                layer.controls.enabled = ! event.value;
+
+            } );
+            const texture = new THREE.TextureLoader().load( 'https://threejs.org/examples/textures/crate.gif' );
+            let coord = UnitsUtils.datumsToSpherical(39.90710,116.39143);
+            texture.colorSpace = THREE.SRGBColorSpace;
+            texture.anisotropy = layer.renderer.capabilities.getMaxAnisotropy();
+            const geometry = new THREE.BoxGeometry();
+            const material = new THREE.MeshLambertMaterial( { map: texture } );
+            const mesh = new THREE.Mesh( geometry, material );
+            mesh.position.set(coord.x,1000, -coord.y);
+            mesh.scale.set(1000,1000,1000);
+            layer.scene.add( mesh );
+
+            
+            const gizmo = control.getHelper();
+            layer.scene.add( gizmo );
+            control.attach( mesh );
+            window.addEventListener( 'keydown', function ( event ) {
+
+switch ( event.key ) {
+
+    case 'q':
+        control.setSpace( control.space === 'local' ? 'world' : 'local' );
+        break;
+
+    case 'Shift':
+        control.setTranslationSnap( 1 );
+        control.setRotationSnap( THREE.MathUtils.degToRad( 15 ) );
+        control.setScaleSnap( 0.25 );
+        break;
+
+    case 'w':
+        control.setMode( 'translate' );
+        break;
+
+    case 'e':
+        control.setMode( 'rotate' );
+        break;
+
+    case 'r':
+        control.setMode( 'scale' );
+        break;
+
+    case 'c':
+        const position = currentCamera.position.clone();
+
+        currentCamera = currentCamera.isPerspectiveCamera ? cameraOrtho : cameraPersp;
+        currentCamera.position.copy( position );
+
+        orbit.object = currentCamera;
+        control.camera = currentCamera;
+
+        currentCamera.lookAt( orbit.target.x, orbit.target.y, orbit.target.z );
+        onWindowResize();
+        break;
+
+    case 'v':
+        const randomFoV = Math.random() + 0.1;
+        const randomZoom = Math.random() + 0.1;
+
+        cameraPersp.fov = randomFoV * 160;
+        cameraOrtho.bottom = - randomFoV * 500;
+        cameraOrtho.top = randomFoV * 500;
+
+        cameraPersp.zoom = randomZoom * 5;
+        cameraOrtho.zoom = randomZoom * 5;
+        onWindowResize();
+        break;
+
+    case '+':
+    case '=':
+        control.setSize( control.size + 0.1 );
+        break;
+
+    case '-':
+    case '_':
+        control.setSize( Math.max( control.size - 0.1, 0.1 ) );
+        break;
+
+    case 'x':
+        control.showX = ! control.showX;
+        break;
+
+    case 'y':
+        control.showY = ! control.showY;
+        break;
+
+    case 'z':
+        control.showZ = ! control.showZ;
+        break;
+
+    case ' ':
+        control.enabled = ! control.enabled;
+        break;
+
+    case 'Escape':
+        control.reset();
+        break;
+
+}
+
+} );
+
+            // 后续再侧边栏启动工具栏
+		</script>
+
+	</body>
+</html>
